@@ -202,15 +202,19 @@ export const resumeReview = async (req, res)=>{
         if(resume.size > 5 * 1024 * 1024){
             return res.json({success: false, message: "Resume file size exceeds allowed size (5MB)."})
         }
-        const pdfData = {
-    text: "Test Resume Content"
-};
+        const dataBuffer = fs.readFileSync(resume.path);
+
+const parser = new PDFParse({
+    data: dataBuffer
+});
+
+const pdfData = await parser.getText();
         //const dataBuffer = fs.readFileSync(resume.path)
         //const pdfData = await pdfParse(dataBuffer);
         const prompt = `Review the following resume and provide constructive feedback on its strengths, weaknesses, and areas for improvement. Resume Content:\n\n${pdfData.text}`
 
        const response = await AI.chat.completions.create({
-            model: "gemini-2.0-flash",
+            model: "gemini-3.5-flash",
             messages: [{ role: "user", content: prompt, } ],
             temperature: 0.7,
             max_tokens: 1000,
